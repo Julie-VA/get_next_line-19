@@ -11,7 +11,7 @@
 /* ************************************************************************** */
 
 #include <unistd.h>
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 char	*save(char *str)
 {
@@ -39,25 +39,25 @@ char	*save(char *str)
 	return (temp);
 }
 
-int	out(char **str, char **line, int count)
+int	out(char **str, char **line, int count, int fd)
 {
 	int		i;
 	char	*temp;
 
-	if (!(*str))
+	if (!(str[fd]))
 		return (-1);
-	temp = malloc(sizeof(char) * (ft_modstrlen(*str, 1) + 1));
+	temp = malloc(sizeof(char) * (ft_modstrlen(str[fd], 1) + 1));
 	if (!temp)
 		return (-1);
 	i = 0;
-	while ((*str)[i] && (*str)[i] != '\n')
+	while ((str[fd])[i] && (str[fd])[i] != '\n')
 	{
-		temp[i] = (*str)[i];
+		temp[i] = (str[fd])[i];
 		i++;
 	}
 	temp[i] = '\0';
 	*line = temp;
-	*str = save(*str);
+	str[fd] = save(str[fd]);
 	if (count == 0)
 		return (0);
 	return (1);
@@ -66,7 +66,7 @@ int	out(char **str, char **line, int count)
 int	get_next_line(int fd, char **line)
 {
 	char			*buff;
-	static char		*str[1];
+	static char		*str[FD_MAX];
 	int				count;
 
 	count = 1;
@@ -75,17 +75,17 @@ int	get_next_line(int fd, char **line)
 	buff = malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	if (!buff)
 		return (-1);
-	while (!ft_strchr(*str, '\n') && count != 0)
+	while (!ft_strchr(str[fd], '\n') && count != 0)
 	{
 		count = read(fd, buff, BUFFER_SIZE);
-		buff[count] = '\0';
 		if (count == -1)
 		{
 			free(buff);
 			return (-1);
 		}
-		*str = ft_strjoin(*str, buff);
+		buff[count] = '\0';
+		str[fd] = ft_strjoin(str[fd], buff);
 	}
 	free(buff);
-	return (out(str, line, count));
+	return (out(str, line, count, fd));
 }
